@@ -1,0 +1,67 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Understand Quran – Alpha Muslim (Preview)</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;600&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--teal:#0f766e;--teal2:#14b8a6;--cream:#fbf7ee;--gold:#c9a24a;--ink:#1f2a2a;--red:#b91c1c}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,sans-serif;background:var(--cream);color:var(--ink)}
+header{background:linear-gradient(135deg,var(--teal),#115e59);color:#fff;padding:18px 16px 14px;text-align:center}
+header h1{margin:0;font-size:20px}header p{margin:4px 0 0;font-size:12px;opacity:.85}
+.ur{font-family:'Noto Nastaliq Urdu',serif;direction:rtl;line-height:2.1}
+.ar{font-family:Amiri,serif;direction:rtl}
+.bar{max-width:560px;margin:12px auto;padding:0 14px}
+.prog{height:8px;background:#e7e0cf;border-radius:9px;overflow:hidden}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--teal2));width:0}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0}
+.nav button{border:0;background:var(--teal);color:#fff;border-radius:10px;padding:9px 14px;font-weight:600}
+.nav button:disabled{opacity:.35}select{padding:8px;border-radius:10px;border:1px solid var(--gold);background:#fff;font-weight:600}
+.stats{font-size:12px;color:#5b6b6b;text-align:center}
+.card{perspective:1200px;margin:14px auto;max-width:560px;padding:0 14px}
+.inner{position:relative;transition:transform .6s;transform-style:preserve-3d;min-height:250px}
+.card.flip .inner{transform:rotateY(180deg)}
+.face{backface-visibility:hidden;-webkit-backface-visibility:hidden;background:#fff;border:1.5px solid var(--gold);border-radius:18px;box-shadow:0 6px 18px #0f766e18;padding:16px}
+.front{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.back{transform:rotateY(180deg)}
+.num{position:absolute;top:10px;left:14px;background:var(--teal);color:#fff;border-radius:50%;width:32px;height:32px;display:grid;place-items:center;font-size:13px;font-weight:700}
+.big{font-size:64px;color:var(--red);line-height:1.3}.tap{font-size:12px;color:#8a9494;margin-top:6px}
+.meta{font-size:12px;color:var(--teal);font-weight:600}
+.mean{display:flex;justify-content:space-between;align-items:center;border-bottom:1px dashed var(--gold);padding-bottom:8px;margin-bottom:8px;gap:10px}
+.mean .ar{font-size:40px;color:var(--red)}.mean .ur{font-size:20px;color:var(--teal)}
+.en{font-size:13px;color:#555}
+.freq{background:#f3ecd9;border-radius:10px;padding:6px 10px;font-size:13px;text-align:center;margin:8px 0}
+.freq b{color:var(--red)}
+.ex{border-top:1px solid #eee;padding-top:8px;margin-top:8px}
+.ex .ar{font-size:23px;line-height:1.9}.ex mark{background:none;color:var(--red);font-weight:700;border-bottom:2px solid var(--gold)}
+.ex .ur{font-size:15px}.ref{font-size:11px;color:var(--teal);font-weight:700}
+.chip{display:inline-block;background:#e6f4f1;color:var(--teal);border-radius:8px;padding:0 8px;font-size:12px}
+.row{display:flex;gap:8px;margin-top:10px}.row button{flex:1;border:1.5px solid var(--teal);background:#fff;color:var(--teal);border-radius:10px;padding:9px;font-weight:600}
+.row button.on{background:var(--teal);color:#fff}
+.flag{font-size:10px;color:#a16207}
+footer{max-width:560px;margin:20px auto 40px;padding:0 16px;font-size:11px;color:#6b7777}
+</style></head><body>
+<header><h1>Understand Quran · <span class="ar">فهم القرآن</span></h1><p id="sub"></p></header>
+<div class="bar"><div class="prog"><i id="pg"></i></div><div class="stats" id="st"></div>
+<div class="nav"><button id="prev">‹ Prev</button><select id="day"></select><button id="next">Next ›</button></div></div>
+<div id="cards"></div>
+<footer id="foot"></footer>
+<script>
+let D,known=JSON.parse(localStorage.getItem('aq_known')||'{}'),day=+localStorage.getItem('aq_day')||1;
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+fetch('words.json').then(r=>r.json()).then(d=>{D=d;const m=d.meta,days=Math.ceil(d.cards.length/5);
+$('#sub').textContent=`${d.cards.length} most frequent words · ~${Math.round(m.token_coverage_pct)}% of the Quran's words · 5 a day`;
+for(let i=1;i<=days;i++)$('#day').add(new Option('Day '+i,i));
+$('#day').onchange=e=>show(+e.target.value);$('#prev').onclick=()=>show(day-1);$('#next').onclick=()=>show(day+1);
+$('#foot').innerHTML=`<b>Preview – data method:</b> ${esc(m.method)}<br>Coverage: ${m.token_coverage_pct}% of word-parts (tokens); ${m.word_coverage_strict_pct}% of the ${m.total_quran_words.toLocaleString()} Quran words are fully made of listed words. Items marked ✎ have editor-supplied meanings pending scholar review.`;
+show(day)});
+function show(n){const days=Math.ceil(D.cards.length/5);day=Math.max(1,Math.min(days,n));localStorage.setItem('aq_day',day);$('#day').value=day;
+$('#prev').disabled=day==1;$('#next').disabled=day==days;
+$('#cards').innerHTML=D.cards.filter(c=>c.day==day).map(card).join('');stats();scrollTo(0,0)}
+function card(c){const ex=c.examples.map(e=>`<div class="ex"><div class="ar">${e.ar_words.map((w,i)=>e.hl.includes(i+1)?`<mark>${w}</mark>`:w).join(' ')}</div>
+<div class="ur">${esc(e.ur)}</div><div><span class="ref">(${e.ref})</span> <span class="chip ur">${esc(e.word_ur)}</span> <span class="en">— ${esc(e.word_en)}</span></div></div>`).join('');
+return `<div class="card" id="c${c.n}"><div class="inner"><div class="face front" onclick="this.closest('.card').classList.add('flip')"><div class="num">${c.n}</div>
+<div class="ar big">${c.ar}</div><div class="meta">${c.type}${c.root?' · root '+c.root:''}</div><div class="tap">Tap to see meaning</div></div>
+<div class="face back"><div class="mean"><div class="ar">${c.ar}</div><div style="text-align:right"><div class="ur">${c.ur.map(esc).join('، ')}</div><div class="en">${c.en.map(esc).join(', ')}</div>${c.meaning_source=='editor'?'<div class="flag">✎ needs review</div>':''}</div></div>
+<div class="freq">Appears <b>${c.count.toLocaleString()}</b> times in <b>${c.ayahs.toLocaleString()}</b> ayahs · <span class="ur">قرآن میں ${c.count} بار</span></div>${ex}
+<div class="row"><button onclick="this.closest('.card').classList.remove('flip')">↺ Flip back</button><button class="${known[c.n]?'on':''}" onclick="tog(${c.n},this)">${known[c.n]?'✓ I know it':'I know it'}</button></div></div></div></div>`}
+function tog(n,b){known[n]=!known[n];if(!known[n])delete known[n];localStorage.setItem('aq_known',JSON.stringify(known));b.classList.toggle('on',!!known[n]);b.textContent=known[n]?'✓ I know it':'I know it';stats()}
+function stats(){const k=Object.keys(known).length,t=D.cards.length;let cov=D.cards.filter(c=>known[c.n]).reduce((a,c)=>a+c.count,0)/D.meta.total_tokens*100;
+$('#pg').style.width=(k/t*100)+'%';$('#st').textContent=`Known ${k}/${t} words · you now recognise ~${cov.toFixed(1)}% of the Quran's words`}
+</script></body></html>
